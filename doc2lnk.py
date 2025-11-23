@@ -1,4 +1,7 @@
 import pylnk3
+from pylnk3 import PathSegmentEntry, TYPE_FOLDER, TYPE_FILE
+from datetime import datetime
+import ntpath
 import wslPath
 import os
 
@@ -19,11 +22,39 @@ class Document:
                         file_handle = open(self.document_path, 'rb')
                         break
                     except IOError:
-                        self.document_path = ""
+                        self.document_path = "untitled"
                         continue
 
         # defualts
         self.icon_path = r'c:\Windows\WinSxS\amd64_microsoft-windows-dxp-deviceexperience_31bf3856ad364e35_10.0.19041.5794_none_bbb825b3af1e2dde\settings.ico'
+
+def convert_to_os_specific_path(directory):
+    try:
+        return wslPath.to_windows(directory)
+    except Exception:
+        return wslPath.to_posix(directory)
+
+# Modify PathSegmentEntry's create_for_path to check paths based on OS being used
+def create_for_path_os_agnostic(cls, path):
+    entry = cls()
+    entry.type = os.path.isdir(convert_to_os_specific_path(path)) and TYPE_FOLDER or TYPE_FILE
+    try:
+        st = os.stat(convert_to_os_specific_path(path))
+        entry.file_size = st.st_size
+        entry.modified = datetime.fromtimestamp(st.st_mtime)
+        entry.created = datetime.fromtimestamp(st.st_ctime)
+        entry.accessed = datetime.fromtimestamp(st.st_atime)
+    except FileNotFoundError:
+        now = datetime.now()
+        entry.file_size = 0
+        entry.modified = now
+        entry.created = now
+        entry.accessed = now
+    entry.short_name = ntpath.split(path)[1]
+    entry.full_name = entry.short_name
+    return entry
+
+PathSegmentEntry.create_for_path = classmethod(create_for_path_os_agnostic)
 
 def get_directory(file_path):
     directory = os.path.dirname(file_path)
@@ -31,29 +62,9 @@ def get_directory(file_path):
     if not directory:
         directory = os.getcwd()
 
-    try:
-        return wslPath.to_windows(directory)
-    except Exception:
-        return directory
-
-def write_lnk_using_document(target, document):
-    try:
-        pylnk3.for_file(
-            target,                                             # lnk target
-            document.document_path + ".lnk",
-            None,                                               # arguments?
-            None,                                               # description
-            document.icon_path,                                 # icon path
-            0,                                                  # icon index?
-            get_directory(document.document_path),              # working directory
-            None,                                               # window mode?
-        )
-
-    except Exception as e:
-        print(f"An error occured while writing .lnk file: {e}")
+    return convert_to_windows_path(directory)
 
 if __name__ == "__main__":
     document = Document("testdocument")
-
-    target = "c:\\Windows\\System32\\cmd.exe"
-    write_lnk_using_document(target, document)
+    target = "C:\\Windows\\System32\\cmd.exe"
+    pylnk3.for_file(target, "test.lnk")
