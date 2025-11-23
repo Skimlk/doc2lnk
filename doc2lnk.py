@@ -1,3 +1,6 @@
+import wslPath
+import os
+
 class Document:
     def __init__(self, document_path=None):
         self.document_extensions = ["docx"]
@@ -20,3 +23,15 @@ class Document:
 
         # defualts
         self.icon_path = r'c:\Windows\WinSxS\amd64_microsoft-windows-dxp-deviceexperience_31bf3856ad364e35_10.0.19041.5794_none_bbb825b3af1e2dde\settings.ico'
+
+def get_directory(file_path):
+    directory = os.path.dirname(file_path)
+
+    if not directory:
+        directory = os.getcwd()
+
+    try:
+        return wslPath.to_windows(directory)
+    except Exception:
+        return directory
+
