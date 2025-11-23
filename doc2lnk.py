@@ -1,3 +1,4 @@
+import pylnk3
 import wslPath
 import os
 
@@ -35,3 +36,24 @@ def get_directory(file_path):
     except Exception:
         return directory
 
+def write_lnk_using_document(target, document):
+    try:
+        pylnk3.for_file(
+            target,                                             # lnk target
+            document.document_path + ".lnk",
+            None,                                               # arguments?
+            None,                                               # description
+            document.icon_path,                                 # icon path
+            0,                                                  # icon index?
+            get_directory(document.document_path),              # working directory
+            None,                                               # window mode?
+        )
+
+    except Exception as e:
+        print(f"An error occured while writing .lnk file: {e}")
+
+if __name__ == "__main__":
+    document = Document("testdocument")
+
+    target = "c:\\Windows\\System32\\cmd.exe"
+    write_lnk_using_document(target, document)
