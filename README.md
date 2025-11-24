@@ -30,5 +30,5 @@ pip3 install -r requirements.txt
 
 ### 3. Run tool
 ```bash
-python3 doc2lnk.py
+python3 -m doc2lnk
 ```
