@@ -65,10 +65,6 @@ def get_directory(file_path):
     return convert_to_os_specific_path(directory)
 
 def write_lnk_using_document(target, document):
-    print(
-        document.document_path,
-        os.path.basename(document.document_path))
-
     try:
         pylnk3.for_file(
             target_file=target,
