@@ -6,8 +6,6 @@
 ## Requirements
 - Python 3.13 or later
 
----
-
 ## Installation
 
 ### 1. Create and activate a virtual environment
@@ -28,4 +26,9 @@ source venv/bin/activate
 ### 2. Install dependencies
 ```bash
 pip3 install -r requirements.txt
+```
+
+### 3. Run tool
+```bash
+python3 -m doc2lnk
 ```
