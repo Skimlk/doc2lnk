@@ -26,7 +26,7 @@ class Document:
                         continue
 
         # defualts
-        self.icon_path = r'c:\Windows\WinSxS\amd64_microsoft-windows-dxp-deviceexperience_31bf3856ad364e35_10.0.19041.5794_none_bbb825b3af1e2dde\settings.ico'
+        self.icon_path = "C:\\Windows\\WinSxS\\amd64_microsoft-windows-dxp-deviceexperience_31bf3856ad364e35_10.0.19041.5794_none_bbb825b3af1e2dde\\ringtones.ico"
 
 def convert_to_os_specific_path(directory):
     try:
@@ -62,9 +62,30 @@ def get_directory(file_path):
     if not directory:
         directory = os.getcwd()
 
-    return convert_to_windows_path(directory)
+    return convert_to_os_specific_path(directory)
+
+def write_lnk_using_document(target, document):
+    print(
+        document.document_path,
+        os.path.basename(document.document_path))
+
+    try:
+        pylnk3.for_file(
+            target_file=target,
+            lnk_name=os.path.basename(document.document_path) + ".lnk",
+            arguments=None,
+            description=None,
+            icon_file=document.icon_path,
+            icon_index=0,
+            work_dir=get_directory(document.document_path),
+            window_mode=None,
+        )
+
+    except Exception as e:
+        print(f"An error occured while writing .lnk file: {e}")
 
 if __name__ == "__main__":
     document = Document("testdocument")
-    target = "C:\\Windows\\System32\\cmd.exe"
-    pylnk3.for_file(target, "test.lnk")
+    target = "C:\\Windows\\WinSxS\\amd64_microsoft-windows-powershell-exe_31bf3856ad364e35_10.0.19041.3996_none_dd93276fb79a0397\\powershell.exe"
+
+    write_lnk_using_document(target, document)
