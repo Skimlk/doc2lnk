@@ -28,7 +28,11 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-### 3. Run tool
+## Usage
 ```bash
-python3 -m doc2lnk
+# Run with a script file
+python3 -m doc2lnk <document> <script>
+
+# Run with a script string
+python3 -m doc2lnk <document> --string <VALUE>
 ```
