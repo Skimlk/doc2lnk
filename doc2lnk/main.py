@@ -10,21 +10,23 @@ class Document:
     def __init__(self, document_path=None):
         self.document_extensions = ["docx"]
         self.document_path = None
+        self.document_content = None
 
         if type(document_path) == str or type(document_path) == unicode:
             self.document_path = document_path
             try:
-                file_handle = open(self.document_path, 'rb')
+                self.document_content = open(self.document_path, 'rb').read()
             except IOError:
                 for document_extension in self.document_extensions:
                     extended_path = document_path + "."  + document_extension
                     try:
                         self.document_path = extended_path
-                        file_handle = open(self.document_path, 'rb')
+                        self.document_content = open(self.document_path, 'rb').read()
                         break
                     except IOError:
                         self.document_path = None
                         continue
+
                 if self.document_path is None:
                     print(f"Error: The document '{document_path}' was not found.")
                     sys.exit(1)
@@ -35,9 +37,12 @@ class Document:
 
 def write_lnk_using_document(target, document, arguments=None):
     try:
+        lnk_name = os.path.basename(document.document_path) + ".lnk"
+        delimiter = b"---LNK_DOCUMENT_BOUNDARY---"
+
         pylnk3.for_file(
             target_file=target,
-            lnk_name=os.path.basename(document.document_path) + ".lnk",
+            lnk_name=lnk_name,
             arguments=arguments,
             description=None,
             icon_file=document.icon_path,
@@ -48,6 +53,11 @@ def write_lnk_using_document(target, document, arguments=None):
 
     except Exception as e:
         print(f"An error occured while writing .lnk file: {e}")
+        return
+
+    with open(lnk_name, "ab") as lnk_handle:
+        lnk_handle.write(delimiter)
+        lnk_handle.write(document.document_content)
 
 def main():
     program_title = "doc2lnk"
