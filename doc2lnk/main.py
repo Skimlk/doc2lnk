@@ -8,7 +8,7 @@ from . import path_operations
 
 class Document:
     def __init__(self, document_path=None):
-        self.document_extensions = ["docx"]
+        self.document_extensions = ["docx", "odt"]
         self.document_path = None
         self.document_content = None
 
