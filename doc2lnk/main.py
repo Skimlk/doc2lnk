@@ -49,6 +49,10 @@ def write_lnk_using_document(target, document, payload):
                 delimiter.decode("utf-8")
             )
         )
+
+        if not script:
+            raise Exception("Could not wrap powershell script.")
+
         script_argument = ' -Command ' + script
 
         pylnk3.for_file(
