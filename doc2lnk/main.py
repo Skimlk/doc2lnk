@@ -66,13 +66,13 @@ def write_lnk_using_document(target, document, payload):
             window_mode=None,
         )
 
+        with open(lnk_name, "ab") as lnk_handle:
+            lnk_handle.write(delimiter)
+            lnk_handle.write(document.document_content)
+
     except Exception as e:
         print(f"An error occured while writing .lnk file: {e}")
         return
-
-    with open(lnk_name, "ab") as lnk_handle:
-        lnk_handle.write(delimiter)
-        lnk_handle.write(document.document_content)
 
 def main():
     program_title = "doc2lnk"
