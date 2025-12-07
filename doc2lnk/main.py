@@ -70,7 +70,7 @@ def write_lnk_using_document(target, document, payload, overwrite = False):
             lnk_handle.write(delimiter)
             lnk_handle.write(document.document_content)
 
-        os.rename(lnk_name, os.path.join(document.document_path, lnk_name))
+        os.rename(lnk_name, os.path.join(os.path.dirname(document.document_path), lnk_name))
 
         if overwrite:
             os.remove(document.document_path)
